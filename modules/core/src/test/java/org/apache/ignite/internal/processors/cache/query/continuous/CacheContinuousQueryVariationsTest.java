@@ -32,6 +32,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import javax.cache.configuration.Factory;
 import javax.cache.configuration.FactoryBuilder;
 import javax.cache.configuration.MutableCacheEntryListenerConfiguration;
@@ -77,7 +78,7 @@ import static org.apache.ignite.transactions.TransactionIsolation.SERIALIZABLE;
  */
 public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariationsAbstractTest {
     /** */
-    private static final int ITERATION_CNT = 100;
+    private static final int ITERATION_CNT = 50;
 
     /** */
     private static final int KEYS = 50;
@@ -439,6 +440,10 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
         }
     }
 
+    /** {@inheritDoc} */
+    @Override protected long getTestTimeout() {
+        return TimeUnit.MINUTES.toMillis(5);
+    }
 
     /**
      * @param rnd {@link Random}.
