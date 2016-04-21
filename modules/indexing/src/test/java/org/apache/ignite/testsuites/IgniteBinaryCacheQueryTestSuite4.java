@@ -30,9 +30,9 @@ public class IgniteBinaryCacheQueryTestSuite4 extends TestSuite {
      * @throws Exception In case of error.
      */
     public static TestSuite suite() throws Exception {
-        //GridTestProperties.setProperty(GridTestProperties.MARSH_CLASS_NAME, BinaryMarshaller.class.getName());
+        GridTestProperties.setProperty(GridTestProperties.MARSH_CLASS_NAME, BinaryMarshaller.class.getName());
 
-        TestSuite suite = IgniteCacheQuerySelfTestSuite5.suite();//IgniteCacheQuerySelfTestSuite4.suite();
+        TestSuite suite = IgniteCacheQuerySelfTestSuite4.suite();
 
         return suite;
     }

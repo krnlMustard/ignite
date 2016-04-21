@@ -21,21 +21,27 @@ import junit.framework.TestSuite;
 import org.apache.ignite.internal.processors.cache.query.continuous.CacheContinuousQueryVariationsTest;
 import org.apache.ignite.testframework.configvariations.ConfigVariationsTestSuiteBuilder;
 
+import static org.apache.ignite.IgniteSystemProperties.IGNITE_DISCOVERY_HISTORY_SIZE;
+
 /**
  * Test suite for cache queries.
  */
-public class IgniteCacheQuerySelfTestSuite5 extends TestSuite {
+public class IgniteContinuousQueryVarSuite extends TestSuite {
     /**
      * @return Test suite.
      * @throws Exception If failed.
      */
     public static TestSuite suite() throws Exception {
+        System.setProperty(IGNITE_DISCOVERY_HISTORY_SIZE, "100");
+
         return new ConfigVariationsTestSuiteBuilder(
             "Ignite Cache Queries Test Suite 5",
             CacheContinuousQueryVariationsTest.class)
             .withBasicCacheParams()
-            .gridsCount(5).backups(1)
-            .testedNodesCount(3).withClients()
+            .gridsCount(3)
+            .backups(1)
+            .testedNodesCount(2)
+            .withClients()
             .build();
     }
 }
