@@ -15,27 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.ignite.internal.processors.cache;
+package org.apache.ignite.testsuites;
 
-import java.util.Collection;
-import org.apache.ignite.internal.IgniteInternalFuture;
-import org.apache.ignite.internal.processors.affinity.AffinityTopologyVersion;
-import org.apache.ignite.internal.processors.cache.version.GridCacheVersion;
+import junit.framework.TestSuite;
+import org.apache.ignite.spark.JavaEmbeddedIgniteRDDSelfTest;
+import org.apache.ignite.spark.JavaStandaloneIgniteRDDSelfTest;
 
 /**
- * Update future for atomic cache.
+ * Test suit for Ignite RDD
  */
-public interface GridCacheAtomicFuture<R> extends GridCacheFuture<R> {
+public class IgniteRDDTestSuite extends TestSuite {
     /**
-     * @return Future version.
+     * @return Java Ignite RDD test suit.
+     * @throws Exception If failed.
      */
-    public GridCacheVersion version();
+    public static TestSuite suite() throws Exception {
+        TestSuite suite = new TestSuite("Java Ignite RDD tests (standalone and embedded modes");
 
-    /**
-     * Gets future that will be completed when it is safe when update is finished on the given version of topology.
-     *
-     * @param topVer Topology version to finish.
-     * @return Future or {@code null} if no need to wait.
-     */
-    public IgniteInternalFuture<Void> completeFuture(AffinityTopologyVersion topVer);
+        suite.addTest(new TestSuite(JavaEmbeddedIgniteRDDSelfTest.class));
+        suite.addTest(new TestSuite(JavaStandaloneIgniteRDDSelfTest.class));
+
+        return suite;
+    }
 }

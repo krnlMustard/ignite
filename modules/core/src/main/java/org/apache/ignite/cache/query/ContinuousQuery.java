@@ -23,6 +23,7 @@ import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryUpdatedListener;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.cache.CacheEntryEventSerializableFilter;
+import org.apache.ignite.lang.IgniteAsyncCallback;
 
 /**
  * API for configuring continuous cache queries.
@@ -92,6 +93,12 @@ import org.apache.ignite.cache.CacheEntryEventSerializableFilter;
  * Note that this works even if you didn't provide initial query. Cursor will
  * be empty in this case, but it will still unregister listeners when {@link QueryCursor#close()}
  * is called.
+ * <p>
+ * {@link CacheEntryEventFilter} and {@link CacheEntryUpdatedListener} support {@link IgniteAsyncCallback} annotation.
+ * If they are annotated in this case invocation of local listener and remote filter will be executing in non-system
+ * thread that allow to use cache operations inside of implementations.
+ *
+ * @see IgniteAsyncCallback
  */
 public final class ContinuousQuery<K, V> extends Query<Cache.Entry<K, V>> {
     /** */
@@ -173,9 +180,14 @@ public final class ContinuousQuery<K, V> extends Query<Cache.Entry<K, V>> {
      * <b>WARNING:</b> all operations that involve any kind of JVM-local or distributed locking (e.g.,
      * synchronization or transactional cache operations), should be executed asynchronously without
      * blocking the thread that called the callback. Otherwise, you can get deadlocks.
+     * <p>
+     * If listener has {@link IgniteAsyncCallback} annotation then invocation of local listener will be executed in
+     * non-system thread that allow to perform a cache operations from implementation. For asynchronous notification
+     * also guaranteed ordering events for key.
      *
      * @param locLsnr Local callback.
      * @return {@code this} for chaining.
+     * @see IgniteAsyncCallback
      */
     public ContinuousQuery<K, V> setLocalListener(CacheEntryUpdatedListener<K, V> locLsnr) {
         this.locLsnr = locLsnr;
@@ -198,11 +210,15 @@ public final class ContinuousQuery<K, V> extends Query<Cache.Entry<K, V>> {
      * <b>WARNING:</b> all operations that involve any kind of JVM-local or distributed locking
      * (e.g., synchronization or transactional cache operations), should be executed asynchronously
      * without blocking the thread that called the filter. Otherwise, you can get deadlocks.
+     * <p>
+     * If remote filter has {@link IgniteAsyncCallback} annotation then invocation of the filter
+     * will be executed in non-system thread that allow to perform a cache operations from implementation.
      *
      * @param rmtFilter Key-value filter.
      * @return {@code this} for chaining.
      *
      * @deprecated Use {@link #setRemoteFilterFactory(Factory)} instead.
+     * @see IgniteAsyncCallback
      */
     @Deprecated
     public ContinuousQuery<K, V> setRemoteFilter(CacheEntryEventSerializableFilter<K, V> rmtFilter) {
@@ -227,9 +243,13 @@ public final class ContinuousQuery<K, V> extends Query<Cache.Entry<K, V>> {
      * <b>WARNING:</b> all operations that involve any kind of JVM-local or distributed locking
      * (e.g., synchronization or transactional cache operations), should be executed asynchronously
      * without blocking the thread that called the filter. Otherwise, you can get deadlocks.
+     * <p>
+     * If remote filter has {@link IgniteAsyncCallback} annotation then invocation of the filter
+     * will be executed in non-system thread that allow to perform a cache operations from implementation.
      *
      * @param rmtFilterFactory Key-value filter factory.
      * @return {@code this} for chaining.
+     * @see IgniteAsyncCallback
      */
     public ContinuousQuery<K, V> setRemoteFilterFactory(
         Factory<? extends CacheEntryEventFilter<K, V>> rmtFilterFactory) {

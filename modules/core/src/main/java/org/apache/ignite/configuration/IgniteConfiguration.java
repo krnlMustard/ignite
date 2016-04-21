@@ -34,6 +34,7 @@ import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheKeyConfiguration;
 import org.apache.ignite.cache.affinity.Affinity;
 import org.apache.ignite.cache.affinity.AffinityFunction;
+import org.apache.ignite.cache.query.ContinuousQuery;
 import org.apache.ignite.cache.store.CacheStoreSessionListener;
 import org.apache.ignite.cluster.ClusterGroup;
 import org.apache.ignite.cluster.ClusterNode;
@@ -43,6 +44,7 @@ import org.apache.ignite.events.Event;
 import org.apache.ignite.events.EventType;
 import org.apache.ignite.internal.managers.eventstorage.GridEventStorageManager;
 import org.apache.ignite.internal.util.typedef.internal.S;
+import org.apache.ignite.lang.IgniteAsyncCallback;
 import org.apache.ignite.lang.IgniteInClosure;
 import org.apache.ignite.lang.IgnitePredicate;
 import org.apache.ignite.lifecycle.LifecycleBean;
@@ -222,6 +224,9 @@ public class IgniteConfiguration {
 
     /** Public pool size. */
     private int pubPoolSize = DFLT_PUBLIC_THREAD_CNT;
+
+    /** Async Callback pool size. */
+    private int callbackPoolSize = DFLT_PUBLIC_THREAD_CNT;
 
     /** System pool size. */
     private int sysPoolSize = DFLT_SYSTEM_CORE_THREAD_CNT;
@@ -723,6 +728,21 @@ public class IgniteConfiguration {
     }
 
     /**
+     * Size of thread pool that is in charge of processing asynchronous callbacks.
+     * <p>
+     * This pool will be used for case when need to perform cache operation in callbacks but in system thread is not
+     * safe (potential deadlock, starvation and etc). For example {@link ContinuousQuery}.
+     * <p>
+     * If not provided, executor service will have size {@link #DFLT_PUBLIC_THREAD_CNT}.
+     *
+     * @return Thread pool size to be used
+     * @see IgniteAsyncCallback
+     */
+    public int getAsyncCallbackPoolSize() {
+        return callbackPoolSize;
+    }
+
+    /**
      * Size of thread pool that is in charge of processing internal and Visor
      * {@link ComputeJob GridJobs}.
      * <p>
@@ -826,6 +846,20 @@ public class IgniteConfiguration {
      */
     public IgniteConfiguration setSystemThreadPoolSize(int poolSize) {
         sysPoolSize = poolSize;
+
+        return this;
+    }
+
+    /**
+     * Sets async callback thread pool size to use within grid.
+     *
+     * @param poolSize Thread pool size to use within grid.
+     * @return {@code this} for chaining.
+     * @see IgniteConfiguration#getAsyncCallbackPoolSize()
+     * @see IgniteAsyncCallback
+     */
+    public IgniteConfiguration setAsyncCallbackPoolSize(int poolSize) {
+        this.callbackPoolSize = poolSize;
 
         return this;
     }
@@ -2177,6 +2211,9 @@ public class IgniteConfiguration {
 
     /**
      * Defines port range to try for time server start.
+     *
+     * If port range value is <tt>0</tt>, then implementation will try bind only to the port provided by
+     * {@link #setTimeServerPortBase(int)} method and fail if binding to this port did not succeed.
      *
      * @return Number of ports to try before server initialization fails.
      */
