@@ -609,7 +609,7 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
      */
     private void checkNoEvent(List<BlockingQueue<CacheEntryEvent<?, ?>>> evtsQueues) throws Exception {
         for (BlockingQueue<CacheEntryEvent<?, ?>> evtsQueue : evtsQueues) {
-            CacheEntryEvent<?, ?> evt = evtsQueue.poll(50, MILLISECONDS);
+            CacheEntryEvent<?, ?> evt = evtsQueue.poll(10, MILLISECONDS);
 
             assertNull(evt);
         }
