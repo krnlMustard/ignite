@@ -164,8 +164,8 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
      * @throws Exception If failed.
      */
     public void testRandomOperationWithFilterWithKeepBinary() throws Exception {
-        if (getConfiguration().getMarshaller() != null
-            || getConfiguration().getMarshaller().getClass() != BinaryMarshaller.class)
+        if (!(getConfiguration().getMarshaller() == null
+            || getConfiguration().getMarshaller().getClass() == BinaryMarshaller.class))
             return;
 
         testRandomOperation(true, true, true, false, true);
