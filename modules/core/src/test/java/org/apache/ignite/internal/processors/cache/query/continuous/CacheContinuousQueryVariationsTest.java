@@ -71,6 +71,7 @@ import static javax.cache.event.EventType.CREATED;
 import static javax.cache.event.EventType.REMOVED;
 import static org.apache.ignite.cache.CacheAtomicityMode.TRANSACTIONAL;
 import static org.apache.ignite.internal.processors.cache.query.continuous.CacheContinuousQueryVariationsTest.SerializableFilter.isAccepted;
+import static org.apache.ignite.testframework.junits.IgniteConfigVariationsAbstractTest.DataMode.EXTERNALIZABLE;
 import static org.apache.ignite.transactions.TransactionIsolation.READ_COMMITTED;
 import static org.apache.ignite.transactions.TransactionIsolation.REPEATABLE_READ;
 import static org.apache.ignite.transactions.TransactionIsolation.SERIALIZABLE;
@@ -218,8 +219,8 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
                                 },
                                 withFilter ?
                                     FactoryBuilder.factoryOf(
-                                        asyncCallback ? new AsyncSerializableFilter(keepBinary)
-                                            : new SerializableFilter(keepBinary))
+                                        asyncCallback ? new AsyncSerializableFilter(keepBinary, dataMode)
+                                            : new SerializableFilter(keepBinary, dataMode))
                                     : null,
                                 true,
                                 syncNtf
@@ -238,8 +239,8 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
 
                         qry.setRemoteFilterFactory(withFilter ?
                             FactoryBuilder.factoryOf(
-                                asyncCallback ? new AsyncSerializableFilter(keepBinary)
-                                    : new SerializableFilter(keepBinary))
+                                asyncCallback ? new AsyncSerializableFilter(keepBinary, dataMode)
+                                    : new SerializableFilter(keepBinary, dataMode))
                             : null);
 
                         curs.add(jcache.query(qry));
@@ -550,7 +551,7 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
         Object oldVal,
         boolean keepBinary, boolean withFilter)
         throws Exception {
-        if (val == null && oldVal == null || (withFilter && val != null && !isAccepted(val, false))) {
+        if (val == null && oldVal == null || (withFilter && val != null && !isAccepted(val, false, dataMode))) {
             checkNoEvent(evtsQueues);
 
             return;
@@ -583,7 +584,7 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
      */
     private Object checkAndGetObject(@Nullable Object obj) {
         if (obj != null) {
-            assert obj instanceof BinaryObject || obj instanceof ExternalizableObject : obj;
+            assert obj instanceof BinaryObject || dataMode == EXTERNALIZABLE: obj;
 
             if (obj instanceof BinaryObject)
                 obj = ((BinaryObject)obj).deserialize();
@@ -782,9 +783,10 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
 
         /**
          * @param keepBinary Keep binary.
+         * @param dataMode Data mode.
          */
-        public AsyncSerializableFilter(boolean keepBinary) {
-            super(keepBinary);
+        public AsyncSerializableFilter(boolean keepBinary, DataMode dataMode) {
+            super(keepBinary, dataMode);
         }
     }
 
@@ -796,34 +798,40 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
         private boolean keepBinary;
 
         /** */
+        private DataMode dataMode;
+
+        /** */
         public SerializableFilter() {
             // No-op.
         }
 
         /**
          * @param keepBinary Keep binary.
+         * @param dataMode Data mode.
          */
-        public SerializableFilter(boolean keepBinary) {
+        public SerializableFilter(boolean keepBinary, DataMode dataMode) {
             this.keepBinary = keepBinary;
+            this.dataMode = dataMode;
         }
 
         /** {@inheritDoc} */
         @Override public boolean evaluate(CacheEntryEvent<?, ?> event)
             throws CacheEntryListenerException {
-            return isAccepted(event.getValue(), keepBinary);
+            return isAccepted(event.getValue(), keepBinary, dataMode);
         }
 
         /**
          * @param val Value.
          * @param keepBinary Keep binary.
+         * @param dataMode Data mode.
          * @return {@code True} if value is even.
          */
-        public static boolean isAccepted(Object val, boolean keepBinary) {
+        public static boolean isAccepted(Object val, boolean keepBinary, DataMode dataMode) {
             if (val != null) {
                 int val0 = 0;
 
                 if (val instanceof TestObject) {
-                    assert !keepBinary || val instanceof ExternalizableObject : val;
+                    assert !keepBinary || dataMode == EXTERNALIZABLE : val;
 
                     val0 = valueOf(val);
                 }

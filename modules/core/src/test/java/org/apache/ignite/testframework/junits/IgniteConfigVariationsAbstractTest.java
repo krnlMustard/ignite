@@ -350,7 +350,7 @@ public abstract class IgniteConfigVariationsAbstractTest extends GridCommonAbstr
     /**
      *
      */
-    protected static class ExternalizableObject extends TestObject implements Externalizable {
+    private static class ExternalizableObject extends TestObject implements Externalizable {
         /**
          * Default constructor.
          */
