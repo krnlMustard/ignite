@@ -48,10 +48,12 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.binary.BinaryObject;
 import org.apache.ignite.cache.CacheEntryEventSerializableFilter;
+import org.apache.ignite.cache.CacheMemoryMode;
 import org.apache.ignite.cache.query.ContinuousQuery;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.internal.binary.BinaryMarshaller;
 import org.apache.ignite.internal.util.typedef.CI1;
 import org.apache.ignite.internal.util.typedef.G;
 import org.apache.ignite.internal.util.typedef.PA;
@@ -81,7 +83,7 @@ import static org.apache.ignite.transactions.TransactionIsolation.SERIALIZABLE;
  */
 public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariationsAbstractTest {
     /** */
-    private static final int ITERATION_CNT = 20;
+    private static final int ITERATION_CNT = 10;
 
     /** */
     private static final int KEYS = 50;
@@ -102,6 +104,10 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
      * @throws Exception If failed.
      */
     public void testRandomOperationJCacheApiKeepBinary() throws Exception {
+        if (!(getConfiguration().getMarshaller() == null
+            || getConfiguration().getMarshaller().getClass() == BinaryMarshaller.class))
+            return;
+
         testRandomOperation(true, false, false, false, true);
     }
 
@@ -158,6 +164,10 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
      * @throws Exception If failed.
      */
     public void testRandomOperationWithFilterWithKeepBinary() throws Exception {
+        if (getConfiguration().getMarshaller() != null
+            || getConfiguration().getMarshaller().getClass() != BinaryMarshaller.class)
+            return;
+
         testRandomOperation(true, true, true, false, true);
     }
 
