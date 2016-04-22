@@ -40,8 +40,6 @@ public class IgniteContinuousQueryVarSuite extends TestSuite {
             .withBasicCacheParams()
             .gridsCount(3)
             .backups(1)
-            .testedNodesCount(2)
-            .withClients()
             .build();
     }
 }

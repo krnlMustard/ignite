@@ -51,6 +51,7 @@ import org.apache.ignite.cache.CacheEntryEventSerializableFilter;
 import org.apache.ignite.cache.query.ContinuousQuery;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.configuration.CacheConfiguration;
+import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.internal.util.typedef.CI1;
 import org.apache.ignite.internal.util.typedef.G;
 import org.apache.ignite.internal.util.typedef.PA;
@@ -86,6 +87,15 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
 
     /** */
     private static final int VALS = 10;
+
+    /** {@inheritDoc} */
+    @Override protected IgniteConfiguration getConfiguration(String gridName) throws Exception {
+        IgniteConfiguration cfg = super.getConfiguration(gridName);
+
+        cfg.setClientMode(gridName.endsWith("0"));
+
+        return cfg;
+    }
 
     /**
      * @throws Exception If failed.
@@ -245,12 +255,13 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
                         if (i % 5 == 0)
                             log.info("Iteration: " + i);
 
-                        randomUpdate(rnd,
-                            evtsQueues,
-                            expData,
-                            keepBinary ? jcache().withKeepBinary() : jcache(),
-                            keepBinary,
-                            withFilter);
+                        for (int idx = 0; idx < G.allGrids().size(); idx++)
+                            randomUpdate(rnd,
+                                evtsQueues,
+                                expData,
+                                keepBinary ? jcache(idx).withKeepBinary() : jcache(idx),
+                                keepBinary,
+                                withFilter);
                     }
                 }
                 catch (Exception e) {
