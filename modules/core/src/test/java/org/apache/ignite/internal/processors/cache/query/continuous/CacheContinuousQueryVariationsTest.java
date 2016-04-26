@@ -82,7 +82,7 @@ import static org.apache.ignite.transactions.TransactionIsolation.SERIALIZABLE;
  */
 public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariationsAbstractTest {
     /** */
-    private static final int ITERATION_CNT = 10;
+    private static final int ITERATION_CNT = 20;
 
     /** */
     private static final int KEYS = 50;
