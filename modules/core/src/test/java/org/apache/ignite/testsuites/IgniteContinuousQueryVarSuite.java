@@ -38,8 +38,8 @@ public class IgniteContinuousQueryVarSuite extends TestSuite {
             "Ignite Cache Queries Test Suite 5",
             CacheContinuousQueryVariationsTest.class)
             .withBasicCacheParams()
-            .gridsCount(3)
-            .backups(1)
+            .gridsCount(5)
+            .backups(2)
             .build();
     }
 }

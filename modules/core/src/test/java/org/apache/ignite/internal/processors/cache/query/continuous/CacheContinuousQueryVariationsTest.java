@@ -103,10 +103,6 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
      * @throws Exception If failed.
      */
     public void testRandomOperationJCacheApiKeepBinary() throws Exception {
-        if (!(getConfiguration().getMarshaller() == null
-            || getConfiguration().getMarshaller().getClass() == BinaryMarshaller.class))
-            return;
-
         testRandomOperation(true, false, false, false, true);
     }
 
@@ -170,10 +166,6 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
      * @throws Exception If failed.
      */
     public void testRandomOperationWithFilterWithKeepBinary() throws Exception {
-        if (!(getConfiguration().getMarshaller() == null
-            || getConfiguration().getMarshaller().getClass() == BinaryMarshaller.class))
-            return;
-
         testRandomOperation(true, true, true, false, true);
     }
 
@@ -195,6 +187,10 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
     private void testRandomOperation(final boolean jcacheApi, final boolean syncNtf, final boolean withFilter,
         final boolean asyncCallback, final boolean keepBinary)
         throws Exception {
+        if (keepBinary && !(getConfiguration().getMarshaller() == null
+            || getConfiguration().getMarshaller().getClass() == BinaryMarshaller.class))
+            return;
+
         runInAllDataModes(new TestRunnable() {
             @Override public void run() throws Exception {
                 long seed = System.currentTimeMillis();
