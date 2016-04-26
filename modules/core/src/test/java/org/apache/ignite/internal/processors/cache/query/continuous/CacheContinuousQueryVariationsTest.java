@@ -48,7 +48,6 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.binary.BinaryObject;
 import org.apache.ignite.cache.CacheEntryEventSerializableFilter;
-import org.apache.ignite.cache.CacheMemoryMode;
 import org.apache.ignite.cache.query.ContinuousQuery;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.configuration.CacheConfiguration;
@@ -144,6 +143,13 @@ public class CacheContinuousQueryVariationsTest extends IgniteCacheConfigVariati
      */
     public void testRandomOperation() throws Exception {
         testRandomOperation(true, true, false, false, false);
+    }
+
+    /**
+     * @throws Exception If failed.
+     */
+    public void testRandomOperationWithKeepBinary() throws Exception {
+        testRandomOperation(true, true, false, false, true);
     }
 
     /**
