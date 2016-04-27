@@ -133,6 +133,9 @@ public class CacheJdbcPojoStoreFactory<K, V> implements Factory<CacheAbstractJdb
     /** Data source. */
     private transient DataSource dataSrc;
 
+    /** Data source factory. */
+    private Factory<DataSource> dataSrcFactory;
+
     /** Application context. */
     @SpringApplicationContextResource
     private transient Object appCtx;
@@ -150,26 +153,26 @@ public class CacheJdbcPojoStoreFactory<K, V> implements Factory<CacheAbstractJdb
 
         if (dataSrc != null)
             store.setDataSource(dataSrc);
-        else {
-            if (dataSrcBean != null) {
-                if (appCtx == null)
-                    throw new IgniteException("Spring application context resource is not injected.");
+        else if (dataSrcBean != null) {
+            if (appCtx == null)
+                throw new IgniteException("Spring application context resource is not injected.");
 
-                IgniteSpringHelper spring;
+            IgniteSpringHelper spring;
 
-                try {
-                    spring = IgniteComponentType.SPRING.create(false);
+            try {
+                spring = IgniteComponentType.SPRING.create(false);
 
-                    DataSource data = spring.loadBeanFromAppContext(appCtx, dataSrcBean);
+                DataSource data = spring.loadBeanFromAppContext(appCtx, dataSrcBean);
 
-                    store.setDataSource(data);
-                }
-                catch (Exception e) {
-                    throw new IgniteException("Failed to load bean in application context [beanName=" + dataSrcBean +
-                        ", igniteConfig=" + appCtx + ']', e);
-                }
+                store.setDataSource(data);
+            }
+            catch (Exception e) {
+                throw new IgniteException("Failed to load bean in application context [beanName=" + dataSrcBean +
+                    ", igniteConfig=" + appCtx + ']', e);
             }
         }
+        else if (dataSrcFactory != null)
+            store.setDataSource(dataSrcFactory.create());
 
         return store;
     }
@@ -181,6 +184,7 @@ public class CacheJdbcPojoStoreFactory<K, V> implements Factory<CacheAbstractJdb
      * @return {@code This} for chaining.
      * @see CacheJdbcPojoStore#setDataSource(DataSource)
      */
+    @Deprecated
     public CacheJdbcPojoStoreFactory<K, V> setDataSource(DataSource dataSrc) {
         this.dataSrc = dataSrc;
 
@@ -351,6 +355,29 @@ public class CacheJdbcPojoStoreFactory<K, V> implements Factory<CacheAbstractJdb
      */
     public CacheJdbcPojoStoreFactory setHasher(JdbcTypeHasher hasher) {
         this.hasher = hasher;
+
+        return this;
+    }
+
+    /**
+     * Gets factory for underlying datasource.
+     *
+     * @return Cache store factory.
+     */
+    @SuppressWarnings("unchecked")
+    public Factory<DataSource> getDataSourceFactory() {
+        return dataSrcFactory;
+    }
+
+    /**
+     * Sets factory for underlying datasource.
+
+     * @param dataSrcFactory Datasource factory.
+     * @return {@code this} for chaining.
+     */
+    @SuppressWarnings("unchecked")
+    public CacheJdbcPojoStoreFactory<K, V> setDataSourceFactory(Factory<DataSource> dataSrcFactory) {
+        this.dataSrcFactory = dataSrcFactory;
 
         return this;
     }
