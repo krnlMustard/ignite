@@ -1039,7 +1039,7 @@ public class BinaryContext {
                 mapper,
                 serializer,
                 true,
-                true /* registered */
+                false
             );
 
             fieldsMeta = desc.fieldsMeta();
